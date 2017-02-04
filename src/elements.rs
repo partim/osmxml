@@ -3,7 +3,7 @@
 //! For now, the types only cotain a limited set of the most important
 //! attributes.
 
-use std::{borrow, hash};
+use std::{borrow, hash, str};
 use std::collections::{HashMap, HashSet};
 
 
@@ -45,11 +45,11 @@ impl Osm {
         &self.nodes
     }
 
-    pub fn has_node(&self, id: u64) -> bool {
+    pub fn has_node(&self, id: i64) -> bool {
         self.nodes.contains(&id)
     }
 
-    pub fn get_node(&self, id: u64) -> Option<&Node> {
+    pub fn get_node(&self, id: i64) -> Option<&Node> {
         self.nodes.get(&id)
     }
 
@@ -57,11 +57,11 @@ impl Osm {
         &self.ways
     }
 
-    pub fn has_way(&self, id: u64) -> bool {
+    pub fn has_way(&self, id: i64) -> bool {
         self.ways.contains(&id)
     }
 
-    pub fn get_way(&self, id: u64) -> Option<&Way> {
+    pub fn get_way(&self, id: i64) -> Option<&Way> {
         self.ways.get(&id)
     }
 
@@ -69,11 +69,11 @@ impl Osm {
         &self.relations
     }
 
-    pub fn has_relation(&self, id: u64) -> bool {
+    pub fn has_relation(&self, id: i64) -> bool {
         self.relations.contains(&id)
     }
 
-    pub fn get_relation(&self, id: u64) -> Option<&Relation> {
+    pub fn get_relation(&self, id: i64) -> Option<&Relation> {
         self.relations.get(&id)
     }
 }
@@ -82,14 +82,14 @@ impl Osm {
 //------------ Node ---------------------------------------------------------
 
 pub struct Node {
-    id: u64,
+    id: i64,
     lat: f64,
     lon: f64,
     tags: Tags,
 }
 
 impl Node {
-    pub fn new(id: u64, lat: f64, lon: f64) -> Self {
+    pub fn new(id: i64, lat: f64, lon: f64) -> Self {
         Node {
             id: id,
             lat: lat,
@@ -112,7 +112,7 @@ impl Node {
 }
 
 impl Node {
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> i64 {
         self.id
     }
 
@@ -129,8 +129,8 @@ impl Node {
     }
 }
 
-impl borrow::Borrow<u64> for Node {
-    fn borrow(&self) -> &u64 {
+impl borrow::Borrow<i64> for Node {
+    fn borrow(&self) -> &i64 {
         &self.id
     }
 }
@@ -153,13 +153,13 @@ impl hash::Hash for Node {
 //------------ Way ----------------------------------------------------------
 
 pub struct Way {
-    id: u64,
-    nodes: Vec<u64>,
+    id: i64,
+    nodes: Vec<i64>,
     tags: Tags,
 }
 
 impl Way {
-    pub fn new(id: u64) -> Self {
+    pub fn new(id: i64) -> Self {
         Way {
             id: id,
             nodes: Vec::new(),
@@ -167,7 +167,7 @@ impl Way {
         }
     }
 
-    pub fn push_node(&mut self, id: u64) {
+    pub fn push_node(&mut self, id: i64) {
         self.nodes.push(id)
     }
 
@@ -177,11 +177,11 @@ impl Way {
 }
 
 impl Way {
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> i64 {
         self.id
     }
 
-    pub fn nodes(&self) -> &[u64] {
+    pub fn nodes(&self) -> &[i64] {
         &self.nodes
     }
 
@@ -190,8 +190,8 @@ impl Way {
     }
 }
 
-impl borrow::Borrow<u64> for Way {
-    fn borrow(&self) -> &u64 {
+impl borrow::Borrow<i64> for Way {
+    fn borrow(&self) -> &i64 {
         &self.id
     }
 }
@@ -214,13 +214,13 @@ impl hash::Hash for Way {
 //------------ Relation ------------------------------------------------------
 
 pub struct Relation {
-    id: u64,
+    id: i64,
     members: Vec<Member>,
     tags: Tags,
 }
 
 impl Relation {
-    pub fn new(id: u64) -> Self {
+    pub fn new(id: i64) -> Self {
         Relation {
             id: id,
             members: Vec::new(),
@@ -238,7 +238,7 @@ impl Relation {
 }
 
 impl Relation {
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> i64 {
         self.id
     }
 
@@ -251,8 +251,8 @@ impl Relation {
     }
 }
 
-impl borrow::Borrow<u64> for Relation {
-    fn borrow(&self) -> &u64 {
+impl borrow::Borrow<i64> for Relation {
+    fn borrow(&self) -> &i64 {
         &self.id
     }
 }
@@ -276,12 +276,12 @@ impl hash::Hash for Relation {
 
 pub struct Member {
     mtype: MemberType,
-    id: u64,
+    id: i64,
     role: String
 }
 
 impl Member {
-    pub fn new(mtype: MemberType, id: u64, role: String) -> Self {
+    pub fn new(mtype: MemberType, id: i64, role: String) -> Self {
         Member {
             mtype: mtype,
             id: id,
@@ -295,7 +295,7 @@ impl Member {
         self.mtype
     }
     
-    pub fn id(&self) -> u64 {
+    pub fn id(&self) -> i64 {
         self.id
     }
 
@@ -312,6 +312,19 @@ pub enum MemberType {
     Way,
     Node,
     Relation
+}
+
+impl str::FromStr for MemberType {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "way" => Ok(MemberType::Way),
+            "node" => Ok(MemberType::Node),
+            "relation" => Ok(MemberType::Relation),
+            _ => Err(format!("invalid member type '{}'", s))
+        }
+    }
 }
 
 
