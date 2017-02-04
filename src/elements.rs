@@ -69,6 +69,10 @@ impl Osm {
         &self.relations
     }
 
+    pub fn relations_mut(&mut self) -> &mut HashSet<Relation> {
+        &mut self.relations
+    }
+
     pub fn has_relation(&self, id: i64) -> bool {
         self.relations.contains(&id)
     }
@@ -248,6 +252,10 @@ impl Relation {
 
     pub fn tags(&self) -> &Tags {
         &self.tags
+    }
+
+    pub fn tags_mut(&mut self) ->&mut Tags {
+        &mut self.tags
     }
 }
 
