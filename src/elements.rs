@@ -38,6 +38,11 @@ impl Osm {
     pub fn add_relation(&mut self, rel: Relation) -> bool {
         self.relations.insert(rel)
     }
+
+    pub fn into_inner(self)
+                      -> (HashSet<Node>, HashSet<Way>, HashSet<Relation>) {
+        (self.nodes, self.ways, self.relations)
+    }
 }
 
 impl Osm {
