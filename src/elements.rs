@@ -341,8 +341,8 @@ impl Tags {
         self.0.insert(key, value);
     }
 
-    pub fn remove(&mut self, key: &str) {
-        self.0.remove(key);
+    pub fn remove(&mut self, key: &str) -> Option<String> {
+        self.0.remove(key)
     }
 }
 
