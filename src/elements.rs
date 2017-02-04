@@ -307,7 +307,7 @@ impl Member {
     pub fn mtype(&self) -> MemberType {
         self.mtype
     }
-    
+
     pub fn id(&self) -> i64 {
         self.id
     }
@@ -320,7 +320,7 @@ impl Member {
 
 //------------ MemberType ----------------------------------------------------
 
-#[derive(Clone, Copy, Debug)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum MemberType {
     Way,
     Node,
