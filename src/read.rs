@@ -23,11 +23,11 @@ fn read_document<R: io::Read>(reader: &mut EventReader<R>) -> Result<Osm> {
     let mut res = Osm::new();
     loop {
         let (name, attrs) = match reader.next()? {
-            XmlEvent::EndDocument => return Ok(res),
             XmlEvent::StartElement{name, attributes, ..} => {
                 (name.local_name, attributes)
             }
-            _ => return Err(Error::from((&*reader, "expected element"))),
+            XmlEvent::EndElement{..} => return Ok(res),
+            _ => return Err(Error::from((&*reader, "expected element")))
         };
         match name.as_ref() {
             "node" => { res.add_node(read_node(attrs, reader)?); },
@@ -130,6 +130,7 @@ fn read_tag<R: io::Read>(attrs: Vec<OwnedAttribute>,
     }
     let k = from_attr(k, reader, "k")?;
     let v = from_attr(v, reader, "v")?;
+    expect_end(reader)?;
     Ok((k, v))
 }
 
@@ -143,6 +144,7 @@ fn read_nd<R: io::Read>(attrs: Vec<OwnedAttribute>,
         }
     }
     let id = from_attr(id, reader, "ref")?;
+    expect_end(reader)?;
     Ok(id)
 }
 
@@ -160,6 +162,7 @@ fn read_member<R: io::Read>(attrs: Vec<OwnedAttribute>,
     let mtype = from_attr(mtype, reader, "type")?;
     let id = from_attr(id, reader, "ref")?;
     let role = from_attr(role, reader, "role")?;
+    expect_end(reader)?;
     Ok(Member::new(mtype, id, role))
 }
 
@@ -190,7 +193,14 @@ fn expect_any_element<R: io::Read>(reader: &mut EventReader<R>)
             Ok(Some((name.local_name, attributes)))
         }
         XmlEvent::EndElement{..} => Ok(None),
-        _ => return Err(Error::from((&*reader, "expected element"))),
+        _ => return Err(Error::from((&*reader, "expected element")))
+    }
+}
+
+fn expect_end<R: io::Read>(reader: &mut EventReader<R>) -> Result<()> {
+    match reader.next()? {
+        XmlEvent::EndElement{..} => Ok(()),
+        _ => return Err(Error::from((&*reader, "expected element")))
     }
 }
 
