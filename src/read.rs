@@ -1,12 +1,16 @@
 //! Reading an OSM XML file.
 
 use std::{fmt, io, str};
+use xml::ParserConfig;
 use xml::attribute::OwnedAttribute;
 use xml::reader::{Error, EventReader, Result, XmlEvent};
 use ::elements::{Member, Node, Osm, Relation, Way};
 
 pub fn read_xml<R: io::Read>(source: R) -> Result<Osm> {
-    let mut reader = EventReader::new(source);
+    let mut config = ParserConfig::new();
+    config.trim_whitespace = true;
+    config.ignore_comments = true;
+    let mut reader = config.create_reader(source);
     while let XmlEvent::ProcessingInstruction{..} = reader.next()? {
     }
     if expect_element(&mut reader, "osm")?.is_none() {
@@ -23,9 +27,7 @@ fn read_document<R: io::Read>(reader: &mut EventReader<R>) -> Result<Osm> {
             XmlEvent::StartElement{name, attributes, ..} => {
                 (name.local_name, attributes)
             }
-            ev => return Err(Error::from((&*reader, 
-                                          format!("expected element, got {:?}",
-                                                  ev)))),
+            _ => return Err(Error::from((&*reader, "expected element"))),
         };
         match name.as_ref() {
             "node" => { res.add_node(read_node(attrs, reader)?); },
