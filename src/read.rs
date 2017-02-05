@@ -23,7 +23,9 @@ fn read_document<R: io::Read>(reader: &mut EventReader<R>) -> Result<Osm> {
             XmlEvent::StartElement{name, attributes, ..} => {
                 (name.local_name, attributes)
             }
-            _ => return Err(Error::from((&*reader, "expected element"))),
+            ev => return Err(Error::from((&*reader, 
+                                          format!("expected element, got {:?}",
+                                                  ev)))),
         };
         match name.as_ref() {
             "node" => { res.add_node(read_node(attrs, reader)?); },
