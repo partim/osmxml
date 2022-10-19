@@ -1,6 +1,7 @@
 //! Reading an OSM XML file.
 
 use std::{fmt, io, str};
+use std::io::BufReader;
 use xml::ParserConfig;
 use xml::attribute::OwnedAttribute;
 use xml::reader::{Error, EventReader, Result, XmlEvent};
@@ -10,7 +11,7 @@ pub fn read_xml<R: io::Read>(source: R) -> Result<Osm> {
     let mut config = ParserConfig::new();
     config.trim_whitespace = true;
     config.ignore_comments = true;
-    let mut reader = config.create_reader(source);
+    let mut reader = config.create_reader(BufReader::new(source));
     while let XmlEvent::ProcessingInstruction{..} = reader.next()? {
     }
     if expect_element(&mut reader, "osm")?.is_none() {
